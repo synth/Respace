@@ -1,5 +1,6 @@
 require 'mini_fb'
 require 'camping/session'
+require 'myspace_scraper'
 #MiniFB.enable_logging
 
 APP_ID = "100817573303266"
@@ -19,21 +20,22 @@ module Respace
   module Models
 
     class PhotoImporter
-      attr_accessor :access_token, :album, :album_set, :created_new_album
+      attr_accessor :access_token, :album, :album_set, :destination_album_name, :created_new_album
       def initialize(token, destination_album)
 	self.access_token = token
+	self.destination_album_name = destination_album
       end
 
      def album
-        self.album ||= PhotoImporter.find_or_create_album(destrination_album)
+        @album ||= self.find_or_create_album(self.destination_album_name)
      end
 
      def album_set
-        self.album_set ||= PhotoImporter.get_albums
+        @album_set ||= self.get_albums
      end
 
-     def self.find_or_create_album(album_name)
-
+     def find_or_create_album(album_name)
+        found_album = nil
         self.album_set.each do |a|
          found_album = a if album_name == a.name
          break if found_album
@@ -45,24 +47,28 @@ module Respace
         else
           self.created_new_album = true
           r = MiniFB.post(self.access_token, "me/albums", :name => album_name)
-          self.album = MiniFb.get(self.access_token, r.id)
+          self.album = MiniFB.get(self.access_token, r.id)
         end
     	self.album.aid = CGI::parse(@album.link.to_s.gsub(/.*\?/, ''))["aid"]
 	return self.album
       end
 
-      def self.get_albums(user='me')
+      def get_albums(user='me')
         album_set = MiniFB.get(self.access_token, "#{user}/albums").data
       end
 
-      def import_photos
+      def import_photos(albums=[])
         r = nil
-        begin
-           file = File.new("rubber-ducky.jpg", 'rb')
-	   r = MiniFB.post(self.access_token, "#{self.album.id}/photos", :file=> file)
-        rescue MiniFB::FaceBookError => e
-          puts "caught exception: #{e.inspect}"
-          @error = e 
+        albums.each do |album, fileset|
+          fileset.each do |f|
+          begin
+             file = File.new(f, 'rb')
+	     r = MiniFB.post(self.access_token, "#{self.album.id}/photos", :file=> file)
+          rescue MiniFB::FaceBookError => e
+            puts "caught exception: #{e.inspect}"
+            @error = e 
+          end
+          end
         end
 
       end
@@ -108,8 +114,10 @@ module Respace::Controllers
 
      album_name = input.album_name || DEFAULT_ALBUM_NAME
      @importer = PhotoImporter.new(@access_token, album_name)
+     @myspace_scraper = MyspaceScraper.new("technofile")
+     @myspace_scraper.begin
 
-
+     @importer.import_photos(@myspace_scraper.filelist)
      render :loaded
    end
  end
