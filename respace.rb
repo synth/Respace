@@ -137,10 +137,24 @@ module Respace::Views
 
   end 
   def user_form
+    h1 "Respace"
+    h2 "This app scrapes all public pictures from a users profile and imports than into facebook"
+    hr
+    ol do 
+    li "I make no claims as to whether this will work for you or not"
+    li "If you have problems, try clearing your cookies, and logging back in to fb and trying again"
+    li "Myspace does not allow you to export their photos via their api, so just make sure your photos are public and this should work"
+    li "You can set the visibility on your myspace photos back to private once they are imported"
+    li "Remember to set your privacy settings on these imported photos as well"
+    li "Also, if you try this multiple times, you may get duplicate photos"
+    end
+    hr
     form :action => "photos" ,:method => "post" do |f|
-      label "Enter the url to your public profile"
+      label "Enter your username to your public profile http://www.myspace.com/"
+
       input :type => "text", :name => "url"
       input :type => "submit", :value => "Submit" 
+
     end
   end
   def loaded
