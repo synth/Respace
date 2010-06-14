@@ -147,6 +147,9 @@ module Respace::Views
     li "You can set the visibility on your myspace photos back to private once they are imported"
     li "Remember to set your privacy settings on these imported photos as well"
     li "Also, if you try this multiple times, you may get duplicate photos"
+    li do 
+	"If you have problems, contact me through the "  + a( "Respace profile page here", :href => "http://www.facebook.com/apps/application.php?id=100817573303266"  )
+    end
     end
     hr
     form :action => "photos" ,:method => "post" do |f|
