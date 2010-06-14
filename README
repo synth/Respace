@@ -1,0 +1,5 @@
+This is a simple facebook app written with camping
+
+This isn't really meant to be distributed as Respace is running on my server and can be accessed on facebook here: http://www.facebook.com/apps/application.php?id=100817573303266
+
+I'm making this available so you can see how you can use Camping as a lightweight facebook app that uses the new Facebook GraphAPI
